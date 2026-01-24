@@ -231,10 +231,35 @@ if st.button("Run Optimization"):
     ax4.legend()
     st.pyplot(fig4)
 
-    # -------- Explanation --------
-    st.subheader("🧠 Optimization Insights")
+    # -------- Decision Reasoning (Explainable Logic) --------
+    st.subheader("🧠 Decision Reasoning (Explainable Logic)")
+
+    logic_points = []
+
+    for h in range(24):
+        if solar[h] > load[h] and op_soc[h] > rb_soc[h]:
+            logic_points.append(
+                f"Hour {h+1}: Excess solar available → battery charged for future demand."
+            )
+        elif op_d[h] == 0 and rb_d[h] > 0:
+            logic_points.append(
+                f"Hour {h+1}: Battery discharged to avoid diesel usage."
+            )
+        elif op_d[h] > 0:
+            logic_points.append(
+                f"Hour {h+1}: Diesel used as last resort due to high demand and low battery."
+            )
+        elif op_g[h] > 0 and op_d[h] == 0:
+            logic_points.append(
+                f"Hour {h+1}: Grid used instead of diesel due to lower operating cost."
+            )
+
+    logic_points = logic_points[:6]
+
+    for point in logic_points:
+        st.write("• " + point)
+
     st.info(
-        "The optimized strategy plans energy usage across the full 24-hour horizon. "
-        "It conserves battery energy during low-risk periods and deploys it during "
-        "peak demand hours, reducing reliance on expensive diesel and lowering total cost."
+        "This logic explanation is automatically generated from optimization results, "
+        "showing why specific operational decisions were taken at key hours."
     )
