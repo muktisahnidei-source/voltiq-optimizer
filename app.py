@@ -16,66 +16,58 @@ st.set_page_config(
     layout="wide",
 )
 
-# VoltIQ premium dark-navy energy-management interface
+# A restrained, conventional dashboard style: light background,
+# dark navy headings, simple borders and minimal decoration.
 st.markdown("""
 <style>
-:root {
-  --navy: #071426; --panel: #10233d; --panel2: #142b49;
-  --cyan: #35d4ee; --blue: #4d8dff; --green: #38d996;
-  --text: #edf5ff; --muted: #9db0c9; --line: rgba(155,190,225,.16);
-}
-.stApp { background: radial-gradient(ellipse at 15% 0%, #163456 0%, #09182c 42%, #071426 100%); color: var(--text); }
-[data-testid="stHeader"] { background: rgba(7,20,38,.85); }
-[data-testid="stSidebar"] { background: linear-gradient(180deg,#0d2038,#09172a); border-right: 1px solid var(--line); }
-[data-testid="stSidebar"] * { color: #dceaff !important; }
-h1,h2,h3,h4 { color: #f2f8ff !important; letter-spacing: -.025em; }
-p, label, .stMarkdown, [data-testid="stCaptionContainer"] { color: #b8c8dc; }
-[data-testid="stMetric"] {
-  background: linear-gradient(145deg,rgba(24,51,82,.96),rgba(13,34,58,.96));
-  border: 1px solid rgba(89,160,218,.25); border-radius: 15px;
-  padding: 16px 18px; box-shadow: 0 8px 28px rgba(0,0,0,.16);
-}
-[data-testid="stMetricLabel"] { color: #9fb5ce !important; font-size: .82rem; }
-[data-testid="stMetricValue"] { color: #f3f9ff !important; font-weight: 700; }
-[data-testid="stMetricDelta"] { color: #45dda4 !important; }
-.stButton > button, .stDownloadButton > button {
-  border-radius: 10px; border: 1px solid rgba(53,212,238,.4);
-  background: linear-gradient(100deg,#17658b,#167c91); color: white;
-  font-weight: 650; padding: .55rem 1rem; transition: all .18s ease;
-}
-.stButton > button:hover, .stDownloadButton > button:hover {
-  border-color: #54e5f5; background: linear-gradient(100deg,#1b789f,#159caf);
-  color: white; transform: translateY(-1px);
-}
-div[data-testid="stExpander"], [data-testid="stDataFrame"], [data-testid="stTable"] {
-  background: rgba(16,35,61,.82); border: 1px solid var(--line); border-radius: 13px;
-}
-.stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"],
-.stFileUploader section { background: #10243d !important; color: #eaf4ff !important; }
-hr { border-color: var(--line); }
-.vq-hero {
-  padding: 25px 28px; border: 1px solid rgba(65,192,225,.28); border-radius: 20px;
-  background: linear-gradient(115deg,rgba(21,69,104,.88),rgba(12,31,54,.92) 58%,rgba(17,58,77,.8));
-  box-shadow: 0 18px 50px rgba(0,0,0,.2); margin: 8px 0 22px 0;
-}
-.vq-kicker { color:#51dff0; font-size:.75rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
-.vq-title { color:#f4f9ff; font-size:2.35rem; font-weight:800; letter-spacing:-.045em; margin:.2rem 0; }
-.vq-sub { color:#b7cce1; font-size:1rem; margin:0; }
-.vq-pill { display:inline-block; border:1px solid rgba(56,217,150,.35); color:#64e8b0;
-  background:rgba(56,217,150,.08); border-radius:99px; padding:5px 10px; font-size:.75rem; }
-.vq-section { color:#eaf5ff; font-size:1.1rem; font-weight:750; margin: .4rem 0 .2rem 0; }
-.vq-note { color:#91a9c4; font-size:.84rem; }
+    .stApp { background: #F5F7FA; color: #172B3A; }
+    [data-testid="stSidebar"] { background: #FFFFFF; border-right: 1px solid #DCE3EA; }
+    [data-testid="stHeader"] { background: #F5F7FA; }
+    h1, h2, h3 { color: #17324D !important; }
+    p, label, .stMarkdown { color: #334155; }
+    div[data-testid="stMetric"] {
+        background: #FFFFFF;
+        border: 1px solid #DCE3EA;
+        border-radius: 6px;
+        padding: 12px 14px;
+    }
+    div[data-testid="stMetricLabel"] { color: #526579; }
+    div[data-testid="stMetricValue"] { color: #17324D; }
+    div.stButton > button[kind="primary"] {
+        background: #174A70;
+        border: 1px solid #174A70;
+        border-radius: 5px;
+        color: white;
+        font-weight: 600;
+    }
+    div.stButton > button {
+        border-radius: 5px;
+    }
+    div[data-testid="stExpander"] {
+        background: #FFFFFF;
+        border: 1px solid #DCE3EA;
+        border-radius: 6px;
+    }
+    hr { border-color: #DCE3EA; }
+    .app-subtitle { color: #64748B; margin-top: -12px; }
+    .section-note { color: #64748B; font-size: 0.9rem; }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("""
-<div class="vq-hero">
-  <div class="vq-kicker">MICROGRID INTELLIGENCE PLATFORM</div>
-  <div class="vq-title">VoltIQ <span style="color:#45d8ef">⚡</span></div>
-  <p class="vq-sub">Optimize energy. Balance storage. Reduce operating cost and carbon impact.</p>
-  <div style="margin-top:14px"><span class="vq-pill">● Decision-support simulation</span></div>
-</div>
-""", unsafe_allow_html=True)
+st.title("VoltIQ")
+st.markdown(
+    '<p class="app-subtitle">Microgrid energy management and scheduling</p>',
+    unsafe_allow_html=True,
+)
+st.markdown(
+    '<div style="background:#FFFFFF;border:1px solid #DCE3EA;border-left:4px solid #174A70;'
+    'padding:12px 16px;margin:16px 0 22px 0;border-radius:4px;">'
+    '<strong style="color:#17324D;">Energy management at a glance</strong>'
+    '<span style="color:#64748B;"> &nbsp; Profile monitoring &nbsp;|&nbsp; '
+    'Cost optimization &nbsp;|&nbsp; Scenario analysis &nbsp;|&nbsp; IoT-ready monitoring</span>'
+    '</div>',
+    unsafe_allow_html=True,
+)
 
 # ------------------------------------------------------------
 # SAMPLE DATA
@@ -137,7 +129,12 @@ with st.sidebar:
 # ------------------------------------------------------------
 # INPUT DATA
 # ------------------------------------------------------------
-st.header("01  /  Energy inputs")
+st.header("1. Energy profile")
+st.markdown(
+    '<p class="section-note">Choose a data source from the sidebar. '
+    'VoltIQ uses hourly demand and solar generation to evaluate the microgrid.</p>',
+    unsafe_allow_html=True,
+)
 
 iot_mode = None
 iot_voltage = 24
@@ -163,7 +160,7 @@ elif input_method == "Manual profile":
         )
     load = peak_load * np.exp(-0.5 * ((hours - 14) / 5) ** 2)
     solar = peak_solar * np.exp(-0.5 * ((hours - 12) / 4) ** 2)
-    st.caption("VoltIQ creates a representative 24-hour profile from the two peak values. Values represent hourly-average power in kW.")
+    st.caption("VoltIQ creates a representative 24-hour profile from the two peak values.")
 
 elif input_method == "Upload CSV":
     st.markdown(
@@ -259,11 +256,28 @@ profile_df = pd.DataFrame({
     "Solar generation (kW)": solar,
 })
 st.subheader("24-hour energy profile")
-st.line_chart(
-    profile_df.set_index("Hour"),
-    height=260,
-)
-st.dataframe(profile_df.round(2), use_container_width=True, hide_index=True)
+profile_chart, profile_axis = plt.subplots(figsize=(11, 3.6))
+profile_chart.patch.set_facecolor("#FFFFFF")
+profile_axis.set_facecolor("#FFFFFF")
+profile_axis.plot(hours, load, color="#174A70", linewidth=2.6, label="Electricity demand")
+profile_axis.plot(hours, solar, color="#D99A16", linewidth=2.6, label="Solar generation")
+profile_axis.fill_between(hours, load, color="#174A70", alpha=0.07)
+profile_axis.set_xlabel("Hour of day")
+profile_axis.set_ylabel("Power (kW)")
+profile_axis.set_xticks([1, 4, 8, 12, 16, 20, 24])
+profile_axis.grid(axis="y", color="#E5EAF0", linewidth=0.8)
+profile_axis.spines[["top", "right"]].set_visible(False)
+profile_axis.spines[["left", "bottom"]].set_color("#CBD5E1")
+profile_axis.tick_params(colors="#526579")
+profile_axis.xaxis.label.set_color("#526579")
+profile_axis.yaxis.label.set_color("#526579")
+profile_axis.legend(frameon=False, ncol=2, loc="upper left")
+profile_chart.tight_layout()
+st.pyplot(profile_chart, use_container_width=True)
+plt.close(profile_chart)
+
+with st.expander("View hourly input data"):
+    st.dataframe(profile_df.round(2), use_container_width=True, hide_index=True)
 
 # ------------------------------------------------------------
 # OPTIMIZATION FUNCTIONS
@@ -377,14 +391,22 @@ def run_optimized(load_values, solar_values, min_soc, max_soc, start_soc, grid_o
 # RUN OPTIMIZATION
 # ------------------------------------------------------------
 st.divider()
-st.header("02  /  Dispatch optimization")
+st.divider()
+st.header("2. Optimization")
 st.markdown(
-    '<p class="section-note">VoltIQ compares a rule-based dispatch strategy with '
-    'a cost-minimizing optimization strategy.</p>',
+    '<p class="section-note">Compare conventional rule-based dispatch with '
+    'VoltIQ cost-optimized scheduling.</p>',
     unsafe_allow_html=True,
 )
-
-run_button = st.button("Run optimization", type="primary")
+run_col, explain_col = st.columns([1, 2])
+with run_col:
+    run_button = st.button("Run optimization", type="primary", use_container_width=True)
+with explain_col:
+    st.markdown(
+        '<p class="section-note" style="padding-top:8px;">The optimizer schedules grid imports, '
+        'battery operation and diesel generation to meet hourly demand at minimum modeled cost.</p>',
+        unsafe_allow_html=True,
+    )
 
 if run_button:
     try:
@@ -441,87 +463,75 @@ if run_button:
 if "voltiq_results" in st.session_state:
     result = st.session_state["voltiq_results"]
 
-    st.subheader("Optimization command centre")
+    st.subheader("Optimization results")
     metric1, metric2, metric3, metric4 = st.columns(4)
     metric1.metric("Rule-based operating cost", f"₹{result['rule_total']:,.2f}")
     metric2.metric("Optimized operating cost", f"₹{result['optimized_total']:,.2f}")
     metric3.metric("Cost reduction", f"{result['savings_percent']:.1f}%")
     metric4.metric("Optimized emissions", f"{result['optimized_emissions']:.2f} kg CO₂")
 
-    # Executive performance indicators and energy-flow summary
-    total_load = float(np.sum(result["load"]))
-    total_solar = float(np.sum(result["solar"]))
-    total_grid = float(np.sum(result["opt_grid"]))
-    total_diesel = float(np.sum(result["opt_diesel"]))
-    solar_used = min(total_solar, total_load + sum(
-        max(0.0, result["opt_soc"][i] - (result["opt_soc"][i-1] if i else result["initial_soc"]))
-        for i in range(24)
-    ))
-    renewable_share = (min(total_solar, total_load) / total_load * 100) if total_load else 0.0
-    emission_saving = result["rule_emissions"] - result["optimized_emissions"]
-    extra1, extra2, extra3, extra4 = st.columns(4)
-    extra1.metric("Daily load served", f"{total_load:.1f} kWh")
-    extra2.metric("Solar generation", f"{total_solar:.1f} kWh")
-    extra3.metric("Grid energy", f"{total_grid:.1f} kWh")
-    extra4.metric("Solar-to-load ratio", f"{renewable_share:.1f}%")
-    st.markdown('<div class="vq-note">Energy quantities are daily totals derived from the selected 24-hour profile. Solar-to-load ratio is a simple indicator, not a full renewable self-consumption calculation.</div>', unsafe_allow_html=True)
+    st.subheader("Optimization visualizations")
+    chart_left, chart_right = st.columns(2, gap="large")
 
-    st.subheader("Energy flow overview")
-    flow_cols = st.columns(4)
-    flow_cols[0].metric("☀️ Solar generated", f"{total_solar:.1f} kWh")
-    flow_cols[1].metric("🏠 Load demand", f"{total_load:.1f} kWh")
-    flow_cols[2].metric("🔌 Grid supplied", f"{total_grid:.1f} kWh")
-    flow_cols[3].metric("⚙️ Diesel supplied", f"{total_diesel:.1f} kWh")
-    flow_df = pd.DataFrame({
-        "Energy source": ["Solar generation", "Grid import", "Diesel generation"],
-        "Energy (kWh)": [total_solar, total_grid, total_diesel]
-    })
-    st.bar_chart(flow_df.set_index("Energy source"), height=190)
+    with chart_left:
+        st.markdown("**Hourly power balance**")
+        dispatch_chart, dispatch_axis = plt.subplots(figsize=(7, 3.5))
+        dispatch_chart.patch.set_facecolor("#FFFFFF")
+        dispatch_axis.set_facecolor("#FFFFFF")
+        dispatch_axis.plot(hours, result["load"], color="#17324D", linewidth=2.4, label="Demand")
+        dispatch_axis.plot(hours, result["solar"], color="#D99A16", linewidth=2.2, label="Solar")
+        dispatch_axis.plot(hours, result["opt_grid"], color="#2583B8", linewidth=1.9, label="Grid")
+        dispatch_axis.plot(hours, result["opt_diesel"], color="#C66A36", linewidth=1.9, label="Diesel")
+        dispatch_axis.set_xlabel("Hour")
+        dispatch_axis.set_ylabel("Power (kW)")
+        dispatch_axis.set_xticks([1, 4, 8, 12, 16, 20, 24])
+        dispatch_axis.grid(axis="y", color="#E5EAF0")
+        dispatch_axis.spines[["top", "right"]].set_visible(False)
+        dispatch_axis.legend(frameon=False, fontsize=8)
+        dispatch_chart.tight_layout()
+        st.pyplot(dispatch_chart, use_container_width=True)
+        plt.close(dispatch_chart)
 
-    st.subheader("Hourly energy dispatch")
-    dispatch_df = pd.DataFrame({
-        "Hour": hours,
-        "Load (kW)": result["load"],
-        "Solar (kW)": result["solar"],
-        "Grid import (kW)": result["opt_grid"],
-        "Diesel generation (kW)": result["opt_diesel"],
-    }).set_index("Hour")
-    st.line_chart(dispatch_df, height=280)
-
-    result_left, result_right = st.columns(2)
-    with result_left:
+    with chart_right:
         st.markdown("**Battery state of charge**")
-        soc_df = pd.DataFrame({
-            "Hour": hours,
-            "Rule-based SOC (kWh)": result["rule_soc"],
-            "Optimized SOC (kWh)": result["opt_soc"],
-        }).set_index("Hour")
-        st.line_chart(soc_df, height=240)
-    with result_right:
-        st.markdown("**Cumulative operating cost**")
-        cost_df = pd.DataFrame({
-            "Hour": hours,
-            "Rule-based (₹)": result["rule_cost"],
-            "Optimized (₹)": result["opt_cost"],
-        }).set_index("Hour")
-        st.line_chart(cost_df, height=240)
+        soc_chart, soc_axis = plt.subplots(figsize=(7, 3.5))
+        soc_chart.patch.set_facecolor("#FFFFFF")
+        soc_axis.set_facecolor("#FFFFFF")
+        soc_axis.plot(hours, result["rule_soc"], color="#7B8794", linewidth=2,
+                      linestyle="--", label="Rule-based")
+        soc_axis.plot(hours, result["opt_soc"], color="#25835A", linewidth=2.4,
+                      label="Optimized")
+        soc_axis.axhline(result["minimum_soc"], color="#C66A36",
+                         linestyle=":", linewidth=1.4, label="Minimum SOC")
+        soc_axis.axhline(result["maximum_soc"], color="#7C6AA6",
+                         linestyle=":", linewidth=1.4, label="Maximum SOC")
+        soc_axis.set_xlabel("Hour")
+        soc_axis.set_ylabel("Stored energy (kWh)")
+        soc_axis.set_xticks([1, 4, 8, 12, 16, 20, 24])
+        soc_axis.grid(axis="y", color="#E5EAF0")
+        soc_axis.spines[["top", "right"]].set_visible(False)
+        soc_axis.legend(frameon=False, fontsize=8)
+        soc_chart.tight_layout()
+        st.pyplot(soc_chart, use_container_width=True)
+        plt.close(soc_chart)
 
-    st.subheader("Operating strategy comparison")
-    comparison_df = pd.DataFrame({
-        "Strategy": ["Rule-based", "Optimized"],
-        "Operating cost (₹)": [result["rule_total"], result["optimized_total"]],
-        "Emissions (kg CO₂)": [result["rule_emissions"], result["optimized_emissions"]]
-    })
-    compare_left, compare_right = st.columns(2)
-    with compare_left:
-        st.caption("Daily operating cost")
-        st.bar_chart(comparison_df.set_index("Strategy")[["Operating cost (₹)"]], height=210)
-    with compare_right:
-        st.caption("Estimated daily emissions")
-        st.bar_chart(comparison_df.set_index("Strategy")[["Emissions (kg CO₂)"]], height=210)
-    st.metric("Estimated emissions avoided vs. rule-based", f"{emission_saving:.2f} kg CO₂",
-              delta=f"{(emission_saving / result['rule_emissions'] * 100):.1f}%"
-              if result["rule_emissions"] > 0 else None)
+    st.markdown("**Cumulative operating cost**")
+    cost_chart, cost_axis = plt.subplots(figsize=(11, 3.2))
+    cost_chart.patch.set_facecolor("#FFFFFF")
+    cost_axis.set_facecolor("#FFFFFF")
+    cost_axis.plot(hours, result["rule_cost"], color="#7B8794", linewidth=2.2,
+                   linestyle="--", label="Rule-based")
+    cost_axis.plot(hours, result["opt_cost"], color="#174A70", linewidth=2.6,
+                   label="VoltIQ optimized")
+    cost_axis.set_xlabel("Hour")
+    cost_axis.set_ylabel("Cumulative cost (₹)")
+    cost_axis.set_xticks([1, 4, 8, 12, 16, 20, 24])
+    cost_axis.grid(axis="y", color="#E5EAF0")
+    cost_axis.spines[["top", "right"]].set_visible(False)
+    cost_axis.legend(frameon=False, ncol=2)
+    cost_chart.tight_layout()
+    st.pyplot(cost_chart, use_container_width=True)
+    plt.close(cost_chart)
 
     st.subheader("Carbon emission estimate")
     emission_table = pd.DataFrame({
@@ -655,10 +665,16 @@ The file must contain 24 data rows, no extra columns, no blank cells and no nega
 """)
 
 st.divider()
-st.markdown("---")
-st.markdown('<div style="text-align:center;color:#7892ad;font-size:.78rem;padding:8px">VOLT IQ  •  MICROGRID ENERGY MANAGEMENT  •  OPTIMIZATION & ANALYTICS</div>', unsafe_allow_html=True)
-st.caption(
-    "VoltIQ is an educational microgrid scheduling and decision-support model. "
-    "It does not directly control physical equipment. IoT values are simulated unless "
-    "a real hardware connection is implemented."
-)
+footer_left, footer_right = st.columns([3, 2])
+with footer_left:
+    st.caption(
+        "VoltIQ is an educational microgrid scheduling and decision-support model. "
+        "It does not directly control physical equipment. IoT values are simulated unless "
+        "a real hardware connection is implemented."
+    )
+with footer_right:
+    st.markdown(
+        '<p style="text-align:right;color:#526579;font-size:0.88rem;'
+        'padding-top:6px;"><strong>Developed by Mukti Sahni</strong></p>',
+        unsafe_allow_html=True,
+    )
