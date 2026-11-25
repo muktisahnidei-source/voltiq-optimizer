@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from pulp import *
+from pulp import LpProblem, LpMinimize, LpVariable, lpSum, value, PULP_CBC_CMD, LpStatus, LpStatusOptimal
 
 # ================= PAGE SETUP =================
 st.set_page_config(page_title="VoltIQ- Microgrid Optimization Dashboard", layout="wide")
@@ -144,26 +144,51 @@ def optimized(load, solar):
     T = 24
     model = LpProblem("Microgrid_Optimization", LpMinimize)
 
-    G = LpVariable.dicts("Grid", range(T), 0)
-    D = LpVariable.dicts("Diesel", range(T), 0)
-    C = LpVariable.dicts("Charge", range(T), 0, max_rate)
-    B = LpVariable.dicts("Discharge", range(T), 0, max_rate)
-    SOC = LpVariable.dicts("SOC", range(T), soc_min, soc_max)
+    # Create decision variables explicitly. This avoids relying on
+    # LpVariable.dicts(), which is the call that failed in the deployed app.
+    G = [LpVariable(f"Grid_{t}", lowBound=0) for t in range(T)]
+    D = [LpVariable(f"Diesel_{t}", lowBound=0) for t in range(T)]
+    C = [LpVariable(f"Charge_{t}", lowBound=0, upBound=max_rate) for t in range(T)]
+    B = [LpVariable(f"Discharge_{t}", lowBound=0, upBound=max_rate) for t in range(T)]
 
-    model += lpSum(G[t]*grid_price + D[t]*diesel_price for t in range(T))
+    # SOC has T+1 values: the initial state plus the state after each hour.
+    SOC = [
+        LpVariable(f"SOC_{t}", lowBound=soc_min, upBound=soc_max)
+        for t in range(T + 1)
+    ]
+
+    model += lpSum(
+        G[t] * grid_price + D[t] * diesel_price
+        for t in range(T)
+    )
+
+    # Initial battery state.
+    initial_soc = 0.5 * capacity
+    model += SOC[0] == initial_soc
 
     for t in range(T):
+        # Hourly power balance.
         model += solar[t] + G[t] + D[t] + B[t] == load[t] + C[t]
 
-    for t in range(1, T):
-        model += SOC[t] == SOC[t-1] + eta*C[t] - B[t]/eta
+        # Battery state transition, including the first hour.
+        model += SOC[t + 1] == SOC[t] + eta * C[t] - B[t] / eta
 
-    model += SOC[0] == 0.5 * capacity
-    model.solve()
+    # Preserve at least the starting charge at the end of the 24-hour cycle.
+    model += SOC[T] >= initial_soc
+
+    # Solve quietly and verify that the solver found an optimal solution.
+    solver = PULP_CBC_CMD(msg=False)
+    model.solve(solver)
+
+    if model.status != LpStatusOptimal:
+        raise RuntimeError(
+            f"Optimization did not find an optimal solution. "
+            f"Solver status: {LpStatus.get(model.status, model.status)}"
+        )
 
     grid = [value(G[t]) for t in range(T)]
     diesel = [value(D[t]) for t in range(T)]
-    soc = [value(SOC[t]) for t in range(T)]
+    soc = [value(SOC[t + 1]) for t in range(T)]
 
     cost = []
     c = 0
@@ -179,7 +204,16 @@ st.header("▶ Run Optimization")
 if st.button("Run Optimization"):
 
     rb_g, rb_d, rb_soc, rb_cost = rule_based(load, solar)
-    op_g, op_d, op_soc, op_cost = optimized(load, solar)
+
+    try:
+        op_g, op_d, op_soc, op_cost = optimized(load, solar)
+    except Exception as exc:
+        st.error(
+            "VoltIQ could not complete the optimization. "
+            "Please check the deployment logs for the technical details."
+        )
+        st.exception(exc)
+        st.stop()
 
     # ================= RESULTS =================
     st.header("📊 Results & Visual Simulation")
