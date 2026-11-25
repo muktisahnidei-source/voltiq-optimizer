@@ -171,8 +171,7 @@ def optimized(load, solar):
         model += solar[t] + G[t] + D[t] + B[t] == load[t] + C[t]
 
         # Battery state transition, including the first hour.
-        model += SOC[t + 1] == SOC[t] + eta * C[t] - B[t] / eta
-
+        model += SOC[t + 1] == SOC[t] + eta * C[t] - (1.0 / eta) * B[t]
     # Preserve at least the starting charge at the end of the 24-hour cycle.
     model += SOC[T] >= initial_soc
 
