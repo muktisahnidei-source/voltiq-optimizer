@@ -20,7 +20,7 @@ col1, col2 = st.columns(2)
 with col1:
     data_mode = st.radio(
         "Load & Solar Input Method",
-        ["Use Sample Data", "Manual Profile Generator", "Upload CSV"]
+        ["Use Sample Data", "Manual Profile Generator", "Upload CSV", "IoT Hardware Mode"]
     )
 
 with col2:
@@ -53,7 +53,7 @@ elif data_mode == "Manual Profile Generator":
     load = peak_load * np.exp(-0.5 * ((hours - 14) / 5)**2)
     solar = peak_solar * np.exp(-0.5 * ((hours - 12) / 4)**2)
 
-else:
+elif data_mode == "Upload CSV":
     file = st.file_uploader("Upload CSV file", type=["csv"])
     if file is None:
         st.warning("Upload a CSV file to proceed.")
@@ -67,6 +67,41 @@ else:
 
     load = df["load"].values
     solar = df["solar"].values
+
+else:
+    st.subheader("IoT Hardware Mode")
+    iot_option = st.radio(
+        "IoT data source",
+        ["Simulation Mode", "ESP32 / Blynk (hardware not connected)"],
+        horizontal=True
+    )
+    load = np.array([
+        3,2.8,2.5,2.3,2.2,2.5,3.5,4.2,4.8,5.2,5.5,5.8,
+        6,5.9,5.7,5.3,5,4.6,4.2,4,3.8,3.5,3.3,3
+    ], dtype=float)
+    solar = np.array([
+        0,0,0,0,0.5,1.5,3,4.5,5.5,6,6.2,6.5,
+        6.3,5.8,5,4,3,2,1,0.5,0,0,0,0
+    ], dtype=float)
+
+    if iot_option == "Simulation Mode":
+        st.success("Simulation mode active. No physical ESP32 or MQ sensor is connected.")
+        iot_voltage = st.number_input(
+            "Illustrative DC bus voltage (V)", min_value=1.0,
+            max_value=100.0, value=24.0, step=1.0
+        )
+        iot_mq2 = st.number_input(
+            "Illustrative MQ-2 sensor reading", min_value=0,
+            max_value=2000, value=250, step=25
+        )
+        st.caption("Sensor values are illustrative only; solar current is calculated from the sample solar profile.")
+    else:
+        st.warning("Hardware not connected. Live ESP32/Blynk readings are not available.")
+        st.info(
+            "Future connection: ESP32 + voltage/current sensor + optional MQ sensor "
+            "→ Wi-Fi → Blynk API or MQTT → VoltIQ."
+        )
+        st.caption("The sample energy profile is used so that optimization can still be demonstrated.")
 
 # -------- System Parameters --------
 st.subheader("⚙️ System Parameters")
@@ -198,6 +233,22 @@ def optimized(load, solar):
 
     return grid, diesel, soc, cost
 
+# ================= CARBON EMISSION SETTINGS =================
+st.subheader("🌱 Carbon Emission Settings")
+emission_col1, emission_col2 = st.columns(2)
+with emission_col1:
+    grid_emission_factor = st.number_input(
+        "Grid emission factor (kg CO₂/kWh)",
+        min_value=0.0, max_value=2.0, value=0.82, step=0.01,
+        help="Illustrative default. Replace with a verified factor appropriate to your electricity source."
+    )
+with emission_col2:
+    diesel_emission_factor = st.number_input(
+        "Diesel emission factor (kg CO₂/kWh)",
+        min_value=0.0, max_value=2.0, value=0.70, step=0.01,
+        help="Illustrative operational emission factor."
+    )
+
 # ================= RUN OPTIMIZATION =================
 st.header("▶ Run Optimization")
 
@@ -222,6 +273,40 @@ if st.button("Run Optimization"):
     m1.metric("Rule-Based Cost", f"Rs {rb_cost[-1]:.2f}")
     m2.metric("Optimized Cost", f"Rs {op_cost[-1]:.2f}")
     m3.metric("Savings", f"Rs {rb_cost[-1] - op_cost[-1]:.2f}")
+
+    # -------- Carbon emission calculation --------
+    rb_grid_emissions = sum(rb_g) * grid_emission_factor
+    rb_diesel_emissions = sum(rb_d) * diesel_emission_factor
+    op_grid_emissions = sum(op_g) * grid_emission_factor
+    op_diesel_emissions = sum(op_d) * diesel_emission_factor
+    rb_total_emissions = rb_grid_emissions + rb_diesel_emissions
+    op_total_emissions = op_grid_emissions + op_diesel_emissions
+
+    st.subheader("🌱 Estimated Carbon Emissions")
+    e1, e2, e3 = st.columns(3)
+    e1.metric("Rule-Based Emissions", f"{rb_total_emissions:.2f} kg CO₂")
+    e2.metric("Optimized Emissions", f"{op_total_emissions:.2f} kg CO₂")
+    reduction_pct = (
+        (rb_total_emissions - op_total_emissions) / rb_total_emissions * 100
+        if rb_total_emissions > 0 else 0.0
+    )
+    e3.metric(
+        "Emission Reduction",
+        f"{rb_total_emissions - op_total_emissions:.2f} kg CO₂",
+        delta=f"{reduction_pct:.1f}%"
+    )
+
+    emission_breakdown = pd.DataFrame({
+        "Strategy": ["Rule-Based", "Optimized"],
+        "Grid emissions (kg CO₂)": [rb_grid_emissions, op_grid_emissions],
+        "Diesel emissions (kg CO₂)": [rb_diesel_emissions, op_diesel_emissions],
+        "Total emissions (kg CO₂)": [rb_total_emissions, op_total_emissions],
+    })
+    st.dataframe(emission_breakdown.round(3), use_container_width=True, hide_index=True)
+    st.caption(
+        "Emissions are estimates calculated from grid and diesel energy use multiplied "
+        "by the selected emission factors. They are not direct sensor measurements."
+    )
 
     # -------- Graph 1: Load vs Solar --------
     st.subheader("Load vs Solar Profile")
@@ -297,3 +382,49 @@ if st.button("Run Optimization"):
         "This logic explanation is automatically generated from optimization results, "
         "showing why specific operational decisions were taken at key hours."
     )
+
+
+# ================= IOT MONITORING DISPLAY =================
+if data_mode == "IoT Hardware Mode":
+    st.header("📡 IoT Monitoring")
+    if iot_option == "Simulation Mode":
+        solar_power_w = np.asarray(solar, dtype=float) * 1000.0
+        solar_current_a = solar_power_w / max(float(iot_voltage), 0.1)
+        gas_status = "Normal" if iot_mq2 < 500 else "Check sensor level"
+
+        i1, i2, i3 = st.columns(3)
+        i1.metric("Illustrative DC voltage", f"{iot_voltage:.1f} V")
+        i2.metric("Calculated peak solar current", f"{np.max(solar_current_a):.2f} A")
+        i3.metric("MQ-2 demonstration status", gas_status)
+
+        iot_data = pd.DataFrame({
+            "Hour": hours,
+            "Illustrative voltage (V)": [iot_voltage] * 24,
+            "Calculated solar current (A)": np.round(solar_current_a, 2),
+            "Calculated solar power (W)": np.round(solar_power_w, 2),
+            "Illustrative MQ-2 reading": [iot_mq2] * 24,
+        })
+        st.line_chart(
+            iot_data.set_index("Hour")[["Calculated solar power (W)", "Calculated solar current (A)"]],
+            height=250
+        )
+        with st.expander("View simulated sensor data"):
+            st.dataframe(iot_data, use_container_width=True, hide_index=True)
+            st.download_button(
+                "Download simulated IoT data (CSV)",
+                iot_data.to_csv(index=False).encode("utf-8"),
+                "voltiq_simulated_iot_data.csv",
+                "text/csv"
+            )
+        st.caption(
+            "Simulation only: these values are not readings from a physical ESP32, "
+            "INA219 or MQ-2 sensor."
+        )
+    else:
+        st.warning("ESP32 / Blynk status: Not connected")
+        st.write(
+            "This option is a future integration placeholder. Live data retrieval "
+            "and API credentials are not configured in this version."
+        )
+        st.code("ESP32 + sensors  →  Wi-Fi  →  Blynk API / MQTT  →  VoltIQ")
+
